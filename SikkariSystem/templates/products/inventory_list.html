@@ -1,0 +1,162 @@
+{# templates/products/inventory_list.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}在庫管理 - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">在庫管理</h2>
+    <div>
+        <a href="{% url 'products:stock_inbound_create' %}" class="btn btn-success me-2">
+            <i class="bi bi-box-arrow-in-down"></i> 入荷登録
+        </a>
+        <a href="{% url 'products:stock_outbound_create' %}" class="btn btn-primary">
+            <i class="bi bi-box-arrow-up"></i> 出荷登録
+        </a>
+    </div>
+</div>
+
+<!-- 在庫サマリー -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">総在庫金額</h6>
+                <h2 class="card-title mb-0">￥{{ total_inventory_value|stringformat:",.0f" }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">在庫切れ製品</h6>
+                <h2 class="card-title mb-0">{{ zero_stock_count }} 件</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">製品総数</h6>
+                <h2 class="card-title mb-0">{{ total_products }} 件</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 検索フォーム -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search_code" class="form-label">製品コード</label>
+                <input type="text" class="form-control" id="search_code" name="code" value="{{ request.GET.code }}">
+            </div>
+            <div class="col-md-4">
+                <label for="search_name" class="form-label">製品名</label>
+                <input type="text" class="form-control" id="search_name" name="name" value="{{ request.GET.name }}">
+            </div>
+            <div class="col-md-4">
+                <label for="stock_status" class="form-label">在庫状態</label>
+                <select class="form-select" id="stock_status" name="status">
+                    <option value="">すべて</option>
+                    <option value="zero" {% if request.GET.status == 'zero' %}selected{% endif %}>在庫切れ</option>
+                    <option value="low" {% if request.GET.status == 'low' %}selected{% endif %}>在庫僅少</option>
+                    <option value="normal" {% if request.GET.status == 'normal' %}selected{% endif %}>通常</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-dark">検索</button>
+                <a href="{% url 'products:inventory_list' %}" class="btn btn-secondary">クリア</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 在庫一覧テーブル -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">在庫一覧</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>製品コード</th>
+                        <th>製品名</th>
+                        <th class="text-end">在庫数</th>
+                        <th class="text-end">単価</th>
+                        <th class="text-end">在庫金額</th>
+                        <th class="text-center">状態</th>
+                        <th style="width: 160px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inventory in inventories %}
+                    <tr>
+                        <td>{{ inventory.product.product_code }}</td>
+                        <td>{{ inventory.product.name }}</td>
+                        <td class="text-end">{{ inventory.quantity }}</td>
+                        <td class="text-end">￥{{ inventory.product.unit_price|stringformat:",.0f" }}</td>
+                        <td class="text-end">￥{{ inventory.total_value|stringformat:",.0f" }}</td>
+                        <td class="text-center">
+                            {% if inventory.quantity == 0 %}
+                                <span class="badge bg-danger">在庫切れ</span>
+                            {% elif inventory.quantity < 10 %}
+                                <span class="badge bg-warning text-dark">在庫僅少</span>
+                            {% else %}
+                                <span class="badge bg-success">通常</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'products:inventory_detail' inventory.pk %}" 
+                                   class="btn btn-outline-dark">詳細</a>
+                                <a href="{% url 'products:stock_inbound_create' %}?product={{ inventory.product.pk }}" 
+                                   class="btn btn-outline-success">入荷</a>
+                                <a href="{% url 'products:stock_outbound_create' %}?product={{ inventory.product.pk }}" 
+                                   class="btn btn-outline-primary">出荷</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            在庫データがありません
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ページネーション -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.code %}code={{ request.GET.code }}&{% endif %}{% if request.GET.name %}name={{ request.GET.name }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}page={{ page_obj.previous_page_number }}">前へ</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?{% if request.GET.code %}code={{ request.GET.code }}&{% endif %}{% if request.GET.name %}name={{ request.GET.name }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.code %}code={{ request.GET.code }}&{% endif %}{% if request.GET.name %}name={{ request.GET.name }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}page={{ page_obj.next_page_number }}">次へ</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

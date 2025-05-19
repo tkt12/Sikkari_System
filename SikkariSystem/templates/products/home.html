@@ -1,0 +1,83 @@
+{# templates/products/home.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}製品管理システム - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<h2 class="mb-4">製品管理システム</h2>
+
+{# 概要情報 #}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">登録製品数</h5>
+                <p class="card-text display-4">{{ product_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h5 class="card-title">製造中</h5>
+                <p class="card-text display-4">{{ production_ongoing }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">在庫金額</h5>
+                <p class="card-text h4">￥{{ inventory_total|stringformat:",.0f" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# 機能へのクイックアクセス #}
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">製品管理</h5>
+                <p class="card-text">製品の登録、編集、製品情報の閲覧ができます。</p>
+                <a href="{% url 'products:product_list' %}" class="btn btn-primary">製品一覧へ</a>
+                <a href="{% url 'products:product_create' %}" class="btn btn-outline-primary">新規登録</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">生産管理</h5>
+                <p class="card-text">製造計画の登録、進捗管理ができます。</p>
+                <a href="{% url 'products:production_list' %}" class="btn btn-primary">生産一覧へ</a>
+                <a href="{% url 'products:production_create' %}" class="btn btn-outline-primary">新規登録</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">在庫管理</h5>
+                <p class="card-text">製品の在庫状況を確認できます。</p>
+                <a href="{% url 'products:inventory_list' %}" class="btn btn-primary">在庫一覧へ</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">入出荷管理</h5>
+                <p class="card-text">製品の入荷・出荷情報を登録できます。</p>
+                <a href="{% url 'products:stock_list' %}" class="btn btn-primary">入出荷一覧へ</a>
+                <div class="btn-group mt-2">
+                    <a href="{% url 'products:stock_inbound_create' %}" class="btn btn-outline-primary">入荷登録</a>
+                    <a href="{% url 'products:stock_outbound_create' %}" class="btn btn-outline-primary">出荷登録</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

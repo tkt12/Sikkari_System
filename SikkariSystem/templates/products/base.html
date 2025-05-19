@@ -1,0 +1,50 @@
+{# templates/products/base.html #}
+
+{% extends "base.html" %}
+
+{# 製品管理システム専用のナビゲーションバーを設定 #}
+{% block content %}
+<div class="row">
+    {# サイドナビゲーション #}
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="card-title mb-0">製品管理メニュー</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'products:product_list' %}" 
+                   class="list-group-item list-group-item-action {% if request.resolver_match.view_name == 'products:product_list' %}active{% endif %}">
+                    製品管理
+                </a>
+                <a href="{% url 'products:production_list' %}" 
+                   class="list-group-item list-group-item-action {% if 'production' in request.resolver_match.view_name %}active{% endif %}">
+                    生産管理
+                </a>
+                <a href="{% url 'products:inventory_list' %}" 
+                   class="list-group-item list-group-item-action {% if 'inventory' in request.resolver_match.view_name %}active{% endif %}">
+                    在庫管理
+                </a>
+                <a href="{% url 'products:stock_list' %}" 
+                   class="list-group-item list-group-item-action {% if 'stock' in request.resolver_match.view_name %}active{% endif %}">
+                    入出荷管理
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# メインコンテンツ #}
+    <div class="col-md-9">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block product_content %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

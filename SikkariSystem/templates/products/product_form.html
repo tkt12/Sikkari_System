@@ -1,0 +1,108 @@
+{# templates/products/product_form.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}{% if object %}製品編集{% else %}製品登録{% endif %} - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{% if object %}製品編集{% else %}製品登録{% endif %}</h2>
+    <a href="{% if object %}{% url 'products:product_detail' object.pk %}{% else %}{% url 'products:product_list' %}{% endif %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left"></i> {% if object %}詳細{% else %}一覧{% endif %}に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">製品情報入力</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- エラーメッセージ -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <!-- 製品コード -->
+                <div class="col-md-4">
+                    <label for="{{ form.product_code.id_for_label }}" class="form-label">
+                        製品コード{% if form.product_code.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.product_code }}
+                    {% if form.product_code.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.product_code.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">英数字で入力してください</div>
+                </div>
+
+                <!-- 製品名 -->
+                <div class="col-md-8">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        製品名{% if form.name.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.name.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 単価 -->
+                <div class="col-md-4">
+                    <label for="{{ form.unit_price.id_for_label }}" class="form-label">
+                        単価{% if form.unit_price.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.unit_price }}
+                    {% if form.unit_price.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.unit_price.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">0以上の整数を入力してください</div>
+                </div>
+            </div>
+
+            <!-- 送信ボタン -->
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-dark px-5">
+                    {% if object %}更新{% else %}登録{% endif %}
+                </button>
+                <a href="{% if object %}{% url 'products:product_detail' object.pk %}{% else %}{% url 'products:product_list' %}{% endif %}" class="btn btn-secondary px-5">
+                    キャンセル
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 注意事項 -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">入力時の注意事項</h5>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li>必須項目（<span class="text-danger">*</span>）は必ず入力してください。</li>
+            <li>製品コードは英数字のみで入力してください。</li>
+            <li>製品名は100文字以内で入力してください。</li>
+            <li>単価は0以上の整数で入力してください。</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

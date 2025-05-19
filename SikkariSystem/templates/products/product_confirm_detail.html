@@ -1,0 +1,111 @@
+{# templates/products/product_confirm_delete.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}製品削除 - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">製品削除</h2>
+    <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left"></i> 詳細に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5 class="card-title mb-0">削除確認</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            以下の製品情報を削除します。この操作は取り消せません。
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">製品コード</th>
+                        <td>{{ product.product_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">製品名</th>
+                        <td>{{ product.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">単価</th>
+                        <td>￥{{ product.unit_price|stringformat:",.0f" }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">在庫数</th>
+                        <td>
+                            {% if product.inventory %}
+                                {{ product.inventory.quantity }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">登録日時</th>
+                        <td>{{ product.created_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">最終更新日時</th>
+                        <td>{{ product.updated_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 関連データの警告 -->
+        {% if product.inventory and product.inventory.quantity > 0 %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <strong>注意:</strong> この製品には在庫が存在します。在庫を処理してから削除してください。
+            </div>
+        {% endif %}
+
+        {% if product.production_set.exists %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <strong>注意:</strong> この製品には生産情報が関連付けられています。
+                削除すると、これらの生産履歴も参照できなくなります。
+            </div>
+        {% endif %}
+
+        {% if product.stockmovement_set.exists %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <strong>注意:</strong> この製品には入出荷履歴が関連付けられています。
+                削除すると、これらの履歴も参照できなくなります。
+            </div>
+        {% endif %}
+
+        <!-- 削除フォーム -->
+        <form method="post" class="text-center">
+            {% csrf_token %}
+            <p class="mb-4">本当にこの製品情報を削除してもよろしいですか？</p>
+            <div class="btn-group">
+                {% if product.inventory and product.inventory.quantity > 0 %}
+                    <button type="submit" class="btn btn-danger px-4" disabled>
+                        <i class="bi bi-trash"></i> 削除できません
+                    </button>
+                {% else %}
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-trash"></i> 削除する
+                    </button>
+                {% endif %}
+                <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-secondary px-4">
+                    キャンセル
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

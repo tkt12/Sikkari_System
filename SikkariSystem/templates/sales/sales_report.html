@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load sales_extras %}
+{% load humanize %}
+
+{% block title %}売上管理 - {{ block.super }}{% endblock %}
+
+{% block content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">売上管理</h2>
+    <form method="get" class="d-flex align-items-center">
+        <select name="year" class="form-select me-2">
+            {% for year in years %}
+                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                    {{ year }}年
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-dark">表示</button>
+    </form>
+</div>
+
+<!-- 年間サマリー -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">{{ selected_year }}年 売上サマリー</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">年間売上高</h6>
+                        <h3>￥{{ yearly_total.total_amount|default:0|floatformat:",.0f" }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">年間受注件数</h6>
+                        <h3>{{ yearly_total.order_count|default:0 }}件</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 月次データ -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">月次売上推移</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>月</th>
+                        <th class="text-end">売上高</th>
+                        <th class="text-end">受注件数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in monthly_totals %}
+                    <tr>
+                        <td>{{ data.month|date:"Y年n月" }}</td>
+                        <td class="text-end">￥{{ data.total_amount|floatformat:",.0f" }}</td>
+                        <td class="text-end">{{ data.order_count }}件</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center py-4">データがありません</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 得意先別データ -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">得意先別売上高（上位10社）</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>得意先名</th>
+                        <th class="text-end">売上高</th>
+                        <th class="text-end">受注件数</th>
+                        <th class="text-end">構成比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in yearly_data|slice:":10" %}
+                    <tr>
+                        <td>{{ data.customer__name }}</td>
+                        <td class="text-end">￥{{ data.total_amount|floatformat:",.0f" }}</td>
+                        <td class="text-end">{{ data.order_count }}件</td>
+                        <td class="text-end">
+                            {% widthratio data.total_amount yearly_total.total_amount 100 %}%
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">データがありません</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 製品別データ -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">製品別売上高（上位10製品）</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>製品名</th>
+                        <th class="text-end">売上高</th>
+                        <th class="text-end">販売数量</th>
+                        <th class="text-end">受注件数</th>
+                        <th class="text-end">構成比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in product_data|slice:":10" %}
+                    <tr>
+                        <td>{{ data.product__name }}</td>
+                        <td class="text-end">￥{{ data.total_amount|floatformat:",.0f" }}</td>
+                        <td class="text-end">{{ data.total_quantity|floatformat:",.0f" }}</td>
+                        <td class="text-end">{{ data.order_count }}件</td>
+                        <td class="text-end">
+                            {% widthratio data.total_amount yearly_total.total_amount 100 %}%
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">データがありません</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

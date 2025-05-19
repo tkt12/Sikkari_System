@@ -1,0 +1,157 @@
+{# templates/products/production_detail.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}{{ production.manufacture_code }} - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">生産情報詳細</h2>
+    <div>
+        <a href="{% url 'products:production_update' production.pk %}" class="btn btn-dark">
+            <i class="bi bi-pencil"></i> 編集
+        </a>
+        <a href="{% url 'products:production_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left"></i> 一覧に戻る
+        </a>
+    </div>
+</div>
+
+<!-- 生産情報の基本情報 -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">基本情報</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">製造コード</th>
+                        <td>{{ production.manufacture_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">対象製品</th>
+                        <td>
+                            <a href="{% url 'products:product_detail' production.product.pk %}">
+                                {{ production.product.name }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">製造数量</th>
+                        <td>{{ production.quantity }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">受注日</th>
+                        <td>{{ production.order_date|date:"Y/m/d" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">製造期日</th>
+                        <td>
+                            {{ production.manufacture_deadline|date:"Y/m/d" }}
+                            {% if production.is_overdue %}
+                                <span class="badge bg-danger">期限切れ</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">完了予定日</th>
+                        <td>{{ production.planned_completion_date|date:"Y/m/d" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 生産状況 -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">生産状況</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">状態</th>
+                        <td>
+                            {% if production.completion_date %}
+                                <span class="badge bg-success">完了</span>
+                            {% else %}
+                                <span class="badge bg-primary">製造中</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">完了日</th>
+                        <td>
+                            {% if production.completion_date %}
+                                {{ production.completion_date|date:"Y/m/d" }}
+                                {% if production.is_delayed %}
+                                    <span class="badge bg-danger">{{ production.delay_days }}日遅延</span>
+                                {% else %}
+                                    <span class="badge bg-success">期限内完了</span>
+                                {% endif %}
+                            {% else %}
+                                未完了
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">登録日時</th>
+                        <td>{{ production.created_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">最終更新日時</th>
+                        <td>{{ production.updated_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 製品情報 -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">製品情報</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">製品コード</th>
+                        <td>{{ production.product.product_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">製品名</th>
+                        <td>{{ production.product.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">在庫数</th>
+                        <td>
+                            {% if production.product.inventory %}
+                                {{ production.product.inventory.quantity }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

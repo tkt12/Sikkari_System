@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}受注編集{% else %}受注登録{% endif %} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{% if object %}受注編集{% else %}受注登録{% endif %}</h2>
+    <a href="{% if object %}{% url 'sales:order_detail' object.pk %}{% else %}{% url 'sales:order_list' %}{% endif %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left"></i> {% if object %}詳細{% else %}一覧{% endif %}に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">受注情報入力</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- エラーメッセージ -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <!-- 得意先 -->
+                <div class="col-md-6">
+                    <label for="{{ form.customer.id_for_label }}" class="form-label">
+                        得意先{% if form.customer.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.customer }}
+                    {% if form.customer.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.customer.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">得意先を選択してください</div>
+                </div>
+
+                <!-- 製品 -->
+                <div class="col-md-6">
+                    <label for="{{ form.product.id_for_label }}" class="form-label">
+                        製品{% if form.product.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.product }}
+                    {% if form.product.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.product.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">製品を選択してください</div>
+                </div>
+
+                <!-- 数量 -->
+                <div class="col-md-4">
+                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                        数量{% if form.quantity.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.quantity.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">1以上の数値を入力してください</div>
+                </div>
+
+                <!-- 受注日 -->
+                <div class="col-md-4">
+                    <label for="{{ form.order_date.id_for_label }}" class="form-label">
+                        受注日{% if form.order_date.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.order_date }}
+                    {% if form.order_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.order_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 納品予定日 -->
+                <div class="col-md-4">
+                    <label for="{{ form.delivery_date.id_for_label }}" class="form-label">
+                        納品予定日{% if form.delivery_date.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.delivery_date }}
+                    {% if form.delivery_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.delivery_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if object %}
+                <!-- 納品完了日（編集時のみ表示） -->
+                <div class="col-md-4">
+                    <label for="{{ form.delivery_completed_date.id_for_label }}" class="form-label">
+                        納品完了日
+                    </label>
+                    {{ form.delivery_completed_date }}
+                    {% if form.delivery_completed_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.delivery_completed_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 送信ボタン -->
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-dark px-5">
+                    {% if object %}更新{% else %}登録{% endif %}
+                </button>
+                <a href="{% if object %}{% url 'sales:order_detail' object.pk %}{% else %}{% url 'sales:order_list' %}{% endif %}" sclass="btn btn-secondary px-5">
+                    キャンセル
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 注意事項 -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">入力時の注意事項</h5>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li>必須項目（<span class="text-danger">*</span>）は必ず入力してください。</li>
+            <li>数量は1以上の整数を入力してください。</li>
+            <li>納品予定日は受注日より後の日付を指定してください。</li>
+            <li>納品完了日は納品予定日以降の日付を指定してください。</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

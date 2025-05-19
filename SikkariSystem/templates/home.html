@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - {{ subtitle }}{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">{{ title }}</h1>
+    <h2 class="display-6 fw-bold text-body-emphasis mb-4">{{ subtitle }}</h2>
+    
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            生産・販売に関する業務を一元管理し、効率的な運営を支援するシステムです。
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 py-5">
+    <!-- 販売支援システム -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="card-title mb-0">販売支援システム</h3>
+                    <i class="bi bi-cart4 fs-1 text-primary"></i>
+                </div>
+                <p class="card-text">受注管理、得意先管理、売上管理など、販売に関する業務を支援します。</p>
+                <a href="{% url 'sales:home' %}" class="btn btn-primary">アクセス</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 製品管理システム -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="card-title mb-0">製品管理システム</h3>
+                    <i class="bi bi-box-seam fs-1 text-success"></i>
+                </div>
+                <p class="card-text">生産管理、在庫管理、入出荷管理など、製品に関する業務を支援します。</p>
+                <a href="{% url 'products:home' %}" class="btn btn-success">アクセス</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

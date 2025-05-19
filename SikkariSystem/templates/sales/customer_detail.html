@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }} - {{ block.super }}{% endblock %}
+
+{% block content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">得意先詳細</h2>
+    <div>
+        <a href="{% url 'sales:customer_update' customer.pk %}" class="btn btn-dark">
+            <i class="bi bi-pencil"></i> 編集
+        </a>
+        <a href="{% url 'sales:customer_delete' customer.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> 削除
+        </a>
+        <a href="{% url 'sales:customer_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left"></i> 一覧に戻る
+        </a>
+    </div>
+</div>
+
+<!-- 得意先情報 -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">基本情報</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">得意先コード</th>
+                        <td>{{ customer.customer_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">得意先名</th>
+                        <td>{{ customer.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">電話番号</th>
+                        <td>{{ customer.phone }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">郵便番号</th>
+                        <td>{{ customer.postal_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">住所</th>
+                        <td>{{ customer.address }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">メールアドレス</th>
+                        <td>{{ customer.email }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">登録日時</th>
+                        <td>{{ customer.created_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">最終更新日時</th>
+                        <td>{{ customer.updated_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 受注履歴 -->
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">受注履歴</h5>
+        <a href="{% url 'sales:order_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-light">
+            <i class="bi bi-plus-lg"></i> 新規受注登録
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>受注日</th>
+                        <th>製品名</th>
+                        <th>数量</th>
+                        <th>受注金額</th>
+                        <th>納品予定日</th>
+                        <th>納品完了日</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in customer.order_set.all|dictsortreversed:"order_date" %}
+                    <tr>
+                        <td>{{ order.order_date|date:"Y/m/d" }}</td>
+                        <td>{{ order.product.name }}</td>
+                        <td>{{ order.quantity|stringformat:"d" }}</td>
+                        <td>￥{{ order.total_amount|stringformat:",.0f" }}</td>
+                        <td>{{ order.delivery_date|date:"Y/m/d" }}</td>
+                        <td>{{ order.delivery_completed_date|date:"Y/m/d"|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'sales:order_detail' order.pk %}" class="btn btn-sm btn-outline-dark">
+                                詳細
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            受注履歴がありません
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 受注統計情報 -->
+<div class="card mt-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">受注統計</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">総受注件数</h6>
+                        <h3>{{ customer.order_set.count }}件</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">総受注金額</h6>
+                        <h3>￥{{ total_amount|stringformat:",.0f" }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">平均受注金額</h6>
+                        <h3>￥{{ average_amount|stringformat:",.0f" }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">未納品件数</h6>
+                        <h3>{{ undelivered_count }}件</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}販売支援システム{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #212529;
+            --secondary: #6c757d;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --border: #dee2e6;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px 0;
+            background-color: var(--light);
+        }
+        .navbar {
+            padding: 1rem 0;
+            background-color: var(--primary) !important;
+        }
+        .navbar-brand, .nav-link {
+            color: var(--white) !important;
+            transition: opacity 0.3s;
+        }
+        .navbar-brand:hover, .nav-link:hover {
+            opacity: 0.8;
+        }
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .main-menu-card {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--primary);
+        }
+        .table th {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        .btn-dark {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        .footer {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container d-flex justify-content-between">
+                <!-- 左端: システム名 -->
+                <a class="navbar-brand" href="{% url 'home' %}">生産管理販売システム</a>
+    
+                <!-- 右端: ログイン情報 -->
+                {% if user.is_authenticated %}
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <span class="nav-link">{{ user.username }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">ログアウト</a>
+                        </li>
+                    </ul>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    
+    <!-- メインコンテンツ -->
+    <main class="main-content">
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer text-center">
+        <div class="container">
+            <small>&copy; 2025 シッカリインダストリ株式会社. All rights reserved.</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

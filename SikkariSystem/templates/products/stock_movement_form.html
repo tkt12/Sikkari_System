@@ -1,0 +1,121 @@
+{# templates/products/stock_movement_form.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}{{ movement_type }}登録 - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{{ movement_type }}登録</h2>
+    <a href="{% url 'products:stock_list' %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left"></i> 一覧に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">{{ movement_type }}情報入力</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.movement_type.as_hidden }}
+            
+            <!-- エラーメッセージ -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <!-- 製品選択 -->
+                <div class="col-md-8">
+                    <label for="{{ form.product.id_for_label }}" class="form-label">
+                        製品{% if form.product.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.product }}
+                    {% if form.product.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.product.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 数量 -->
+                <div class="col-md-4">
+                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                        数量{% if form.quantity.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.quantity.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">1以上の整数を入力してください</div>
+                </div>
+
+                <!-- 日付 -->
+                <div class="col-md-4">
+                    <label for="{{ form.movement_date.id_for_label }}" class="form-label">
+                        {{ movement_type }}日{% if form.movement_date.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.movement_date }}
+                    {% if form.movement_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.movement_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 備考 -->
+                <div class="col-12">
+                    <label for="{{ form.note.id_for_label }}" class="form-label">
+                        備考
+                    </label>
+                    {{ form.note }}
+                    {% if form.note.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.note.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 送信ボタン -->
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-dark px-5">登録</button>
+                <a href="{% url 'products:stock_list' %}" class="btn btn-secondary px-5">キャンセル</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 注意事項 -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">入力時の注意事項</h5>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li>必須項目（<span class="text-danger">*</span>）は必ず入力してください。</li>
+            <li>数量は1以上の整数を入力してください。</li>
+            {% if form.initial.movement_type == 'OUT' %}
+            <li>出荷数量は在庫数を超えることはできません。</li>
+            {% endif %}
+            <li>備考欄には{{ movement_type }}に関する補足情報を入力してください。</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

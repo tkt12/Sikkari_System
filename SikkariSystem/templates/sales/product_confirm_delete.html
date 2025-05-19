@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}製品削除 - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">製品削除</h2>
+    <a href="{% url 'sales:product_detail' product.pk %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left"></i> 詳細に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5 class="card-title mb-0">削除確認</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            以下の製品情報を削除します。この操作は取り消せません。
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">製品コード</th>
+                        <td>{{ product.product_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">製品名</th>
+                        <td>{{ product.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">単価</th>
+                        <td>￥{{ product.unit_price|stringformat:",.0f" }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">登録日時</th>
+                        <td>{{ product.created_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">最終更新日時</th>
+                        <td>{{ product.updated_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        {% if product.order_set.exists %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <strong>注意:</strong> この製品には {{ product.order_set.count }}件の受注データが関連付けられています。
+                削除すると、これらの受注履歴も参照できなくなります。
+            </div>
+        {% endif %}
+
+        <form method="post" class="text-center">
+            {% csrf_token %}
+            <p class="mb-4">本当にこの製品情報を削除してもよろしいですか？</p>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-danger px-4">
+                    <i class="bi bi-trash"></i> 削除する
+                </button>
+                <a href="{% url 'sales:product_detail' product.pk %}" class="btn btn-secondary px-4">
+                    キャンセル
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

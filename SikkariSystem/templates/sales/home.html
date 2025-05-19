@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}ホーム - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4">販売支援システム</h2>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <a href="{% url 'sales:customer_list' %}" class="card main-menu-card">
+            <div class="card-body text-center">
+                <h3 class="card-title">得意先管理</h3>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="{% url 'sales:order_list' %}" class="card main-menu-card">
+            <div class="card-body text-center">
+                <h3 class="card-title">受注管理</h3>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="{% url 'sales:product_list' %}" class="card main-menu-card">
+            <div class="card-body text-center">
+                <h3 class="card-title">製品管理</h3>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="{% url 'sales:sales_report' %}" class="card main-menu-card">
+            <div class="card-body text-center">
+                <h3 class="card-title">売上管理</h3>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

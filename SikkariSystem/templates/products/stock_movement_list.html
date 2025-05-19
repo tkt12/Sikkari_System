@@ -1,0 +1,160 @@
+{# templates/products/stock_movement_list.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}入出荷管理 - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">入出荷管理</h2>
+    <div>
+        <a href="{% url 'products:stock_inbound_create' %}" class="btn btn-success me-2">
+            <i class="bi bi-box-arrow-in-down"></i> 入荷登録
+        </a>
+        <a href="{% url 'products:stock_outbound_create' %}" class="btn btn-primary">
+            <i class="bi bi-box-arrow-up"></i> 出荷登録
+        </a>
+    </div>
+</div>
+
+<!-- 入出荷サマリー -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">今月の入荷数</h6>
+                <h2 class="card-title mb-0">{{ monthly_inbound_total }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">今月の出荷数</h6>
+                <h2 class="card-title mb-0">{{ monthly_outbound_total }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">本日の入荷数</h6>
+                <h2 class="card-title mb-0">{{ daily_inbound_total }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">本日の出荷数</h6>
+                <h2 class="card-title mb-0">{{ daily_outbound_total }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 検索フォーム -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="search_product" class="form-label">製品</label>
+                <input type="text" class="form-control" id="search_product" name="product" value="{{ request.GET.product }}">
+            </div>
+            <div class="col-md-3">
+                <label for="movement_type" class="form-label">種別</label>
+                <select class="form-select" id="movement_type" name="type">
+                    <option value="">すべて</option>
+                    <option value="IN" {% if request.GET.type == 'IN' %}selected{% endif %}>入荷</option>
+                    <option value="OUT" {% if request.GET.type == 'OUT' %}selected{% endif %}>出荷</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="date_from" class="form-label">期間（開始）</label>
+                <input type="date" class="form-control" id="date_from" name="from" value="{{ request.GET.from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="date_to" class="form-label">期間（終了）</label>
+                <input type="date" class="form-control" id="date_to" name="to" value="{{ request.GET.to }}">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-dark">検索</button>
+                <a href="{% url 'products:stock_list' %}" class="btn btn-secondary">クリア</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 入出荷履歴一覧 -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">入出荷履歴</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>種別</th>
+                        <th>製品コード</th>
+                        <th>製品名</th>
+                        <th class="text-end">数量</th>
+                        <th>備考</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in movements %}
+                    <tr>
+                        <td>{{ movement.movement_date|date:"Y/m/d" }}</td>
+                        <td>
+                            {% if movement.movement_type == 'IN' %}
+                                <span class="badge bg-success">入荷</span>
+                            {% else %}
+                                <span class="badge bg-primary">出荷</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ movement.product.product_code }}</td>
+                        <td>{{ movement.product.name }}</td>
+                        <td class="text-end">{{ movement.quantity }}</td>
+                        <td>{{ movement.note|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            入出荷履歴がありません
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ページネーション -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.product %}product={{ request.GET.product }}&{% endif %}{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.from %}from={{ request.GET.from }}&{% endif %}{% if request.GET.to %}to={{ request.GET.to }}&{% endif %}page={{ page_obj.previous_page_number }}">前へ</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?{% if request.GET.product %}product={{ request.GET.product }}&{% endif %}{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.from %}from={{ request.GET.from }}&{% endif %}{% if request.GET.to %}to={{ request.GET.to }}&{% endif %}page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.product %}product={{ request.GET.product }}&{% endif %}{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.from %}from={{ request.GET.from }}&{% endif %}{% if request.GET.to %}to={{ request.GET.to }}&{% endif %}page={{ page_obj.next_page_number }}">次へ</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

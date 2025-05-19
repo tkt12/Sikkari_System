@@ -1,0 +1,124 @@
+{# templates/products/production_history.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}生産履歴 - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">生産履歴</h2>
+    <div>
+        <a href="{% url 'products:production_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left"></i> 生産管理に戻る
+        </a>
+    </div>
+</div>
+
+<!-- 検索フォーム -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search_code" class="form-label">製造コード</label>
+                <input type="text" class="form-control" id="search_code" name="code" value="{{ request.GET.code }}">
+            </div>
+            <div class="col-md-4">
+                <label for="search_product" class="form-label">製品名</label>
+                <input type="text" class="form-control" id="search_product" name="product" value="{{ request.GET.product }}">
+            </div>
+            <div class="col-md-4">
+                <label for="search_period" class="form-label">完了日</label>
+                <select class="form-select" id="search_period" name="period">
+                    <option value="">すべて</option>
+                    <option value="1m" {% if request.GET.period == '1m' %}selected{% endif %}>1ヶ月以内</option>
+                    <option value="3m" {% if request.GET.period == '3m' %}selected{% endif %}>3ヶ月以内</option>
+                    <option value="6m" {% if request.GET.period == '6m' %}selected{% endif %}>6ヶ月以内</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-dark">検索</button>
+                <a href="{% url 'products:production_history' %}" class="btn btn-secondary">クリア</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 生産履歴一覧テーブル -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>製造コード</th>
+                        <th>製品名</th>
+                        <th>数量</th>
+                        <th>製造期日</th>
+                        <th>完了予定日</th>
+                        <th>完了日</th>
+                        <th>遅延</th>
+                        <th style="width: 100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for production in productions %}
+                    <tr>
+                        <td>{{ production.manufacture_code }}</td>
+                        <td>{{ production.product.name }}</td>
+                        <td>{{ production.quantity }}</td>
+                        <td>{{ production.manufacture_deadline|date:"Y/m/d" }}</td>
+                        <td>{{ production.planned_completion_date|date:"Y/m/d" }}</td>
+                        <td>{{ production.completion_date|date:"Y/m/d" }}</td>
+                        <td>
+                            {% if production.is_delayed %}
+                                <span class="badge bg-danger">
+                                    {{ production.delay_days }}日遅延
+                                </span>
+                            {% else %}
+                                <span class="badge bg-success">期限内完了</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'products:production_detail' production.pk %}" 
+                               class="btn btn-sm btn-outline-dark">詳細</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            完了した生産情報がありません
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ページネーション -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.code %}code={{ request.GET.code }}&{% endif %}{% if request.GET.product %}product={{ request.GET.product }}&{% endif %}{% if request.GET.period %}period={{ request.GET.period }}&{% endif %}page={{ page_obj.previous_page_number }}">前へ</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?{% if request.GET.code %}code={{ request.GET.code }}&{% endif %}{% if request.GET.product %}product={{ request.GET.product }}&{% endif %}{% if request.GET.period %}period={{ request.GET.period }}&{% endif %}page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?{% if request.GET.code %}code={{ request.GET.code }}&{% endif %}{% if request.GET.product %}product={{ request.GET.product }}&{% endif %}{% if request.GET.period %}period={{ request.GET.period }}&{% endif %}page={{ page_obj.next_page_number }}">次へ</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

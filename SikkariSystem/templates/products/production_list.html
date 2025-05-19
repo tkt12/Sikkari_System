@@ -1,0 +1,130 @@
+{# templates/products/production_list.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}生産管理 - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">生産管理</h2>
+    <div>
+        <a href="{% url 'products:production_history' %}" class="btn btn-outline-dark me-2">
+            <i class="bi bi-clock-history"></i> 生産履歴
+        </a>
+        <a href="{% url 'products:production_create' %}" class="btn btn-dark">
+            <i class="bi bi-plus-lg"></i> 新規登録
+        </a>
+    </div>
+</div>
+
+<!-- 生産状況サマリー -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">製造中</h6>
+                <h2 class="card-title mb-0">{{ production_list|length }} 件</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">期限切れ</h6>
+                <h2 class="card-title mb-0">{{ productions_overdue|length }} 件</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2">今月の完了予定</h6>
+                <h2 class="card-title mb-0">{{ productions_this_month|length }} 件</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 生産情報一覧テーブル -->
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">製造中の生産情報</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>製造コード</th>
+                        <th>製品名</th>
+                        <th>数量</th>
+                        <th>製造期日</th>
+                        <th>完了予定日</th>
+                        <th>状態</th>
+                        <th style="width: 100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for production in production_list %}
+                    <tr>
+                        <td>{{ production.manufacture_code }}</td>
+                        <td>{{ production.product.name }}</td>
+                        <td>{{ production.quantity }}</td>
+                        <td>
+                            {{ production.manufacture_deadline|date:"Y/m/d" }}
+                            {% if production.is_overdue %}
+                                <span class="badge bg-danger">期限切れ</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ production.planned_completion_date|date:"Y/m/d" }}</td>
+                        <td>
+                            {% if production.completion_date %}
+                                <span class="badge bg-success">完了</span>
+                            {% else %}
+                                <span class="badge bg-primary">製造中</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'products:production_detail' production.pk %}" 
+                               class="btn btn-sm btn-outline-dark">詳細</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            製造中の生産情報がありません
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ページネーション -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">前へ</a>
+        </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">次へ</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

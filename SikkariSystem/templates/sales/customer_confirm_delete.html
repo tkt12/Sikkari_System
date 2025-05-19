@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}得意先削除 - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">得意先削除</h2>
+    <a href="{% url 'sales:customer_detail' customer.pk %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left"></i> 詳細に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5 class="card-title mb-0">削除確認</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            以下の得意先情報を削除します。この操作は取り消せません。
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">得意先コード</th>
+                        <td>{{ customer.customer_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">得意先名</th>
+                        <td>{{ customer.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">電話番号</th>
+                        <td>{{ customer.phone }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">郵便番号</th>
+                        <td>{{ customer.postal_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">住所</th>
+                        <td>{{ customer.address }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">メールアドレス</th>
+                        <td>{{ customer.email }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        {% if customer.order_set.exists %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <strong>注意:</strong> この得意先には {{ customer.order_set.count }}件の受注データが関連付けられています。
+                削除すると、これらの受注履歴も参照できなくなります。
+            </div>
+        {% endif %}
+
+        <form method="post" class="text-center">
+            {% csrf_token %}
+            <p class="mb-4">本当にこの得意先情報を削除してもよろしいですか？</p>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-danger px-4">
+                    <i class="bi bi-trash"></i> 削除する
+                </button>
+                <a href="{% url 'sales:customer_detail' customer.pk %}" class="btn btn-secondary px-4">
+                    キャンセル
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

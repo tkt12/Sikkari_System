@@ -1,0 +1,176 @@
+{# templates/products/production_form.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}{% if object %}生産情報編集{% else %}生産情報登録{% endif %} - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{% if object %}生産情報編集{% else %}生産情報登録{% endif %}</h2>
+    <a href="{% if object %}{% url 'products:production_detail' object.pk %}{% else %}{% url 'products:production_list' %}{% endif %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left"></i> {% if object %}詳細{% else %}一覧{% endif %}に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">生産情報入力</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- エラーメッセージ -->
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <!-- 製造コード -->
+                <div class="col-md-4">
+                    <label for="{{ form.manufacture_code.id_for_label }}" class="form-label">
+                        製造コード{% if form.manufacture_code.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.manufacture_code }}
+                    {% if form.manufacture_code.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.manufacture_code.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">製造を識別する一意のコードを入力してください</div>
+                </div>
+
+                <!-- 製品 -->
+                <div class="col-md-8">
+                    <label for="{{ form.product.id_for_label }}" class="form-label">
+                        製品{% if form.product.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.product }}
+                    {% if form.product.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.product.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 製造数量 -->
+                <div class="col-md-4">
+                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                        製造数量{% if form.quantity.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.quantity.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">1以上の整数を入力してください</div>
+                </div>
+
+                <!-- 受注日 -->
+                <div class="col-md-4">
+                    <label for="{{ form.order_date.id_for_label }}" class="form-label">
+                        受注日{% if form.order_date.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.order_date }}
+                    {% if form.order_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.order_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 製造期日 -->
+                <div class="col-md-4">
+                    <label for="{{ form.manufacture_deadline.id_for_label }}" class="form-label">
+                        製造期日{% if form.manufacture_deadline.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.manufacture_deadline }}
+                    {% if form.manufacture_deadline.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.manufacture_deadline.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- 完了予定日 -->
+                <div class="col-md-4">
+                    <label for="{{ form.planned_completion_date.id_for_label }}" class="form-label">
+                        完了予定日{% if form.planned_completion_date.field.required %}<span class="text-danger">*</span>{% endif %}
+                    </label>
+                    {{ form.planned_completion_date }}
+                    {% if form.planned_completion_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.planned_completion_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if object %}
+                <!-- 完了日（編集時のみ表示） -->
+                <div class="col-md-4">
+                    <label for="{{ form.completion_date.id_for_label }}" class="form-label">
+                        完了日
+                    </label>
+                    {{ form.completion_date }}
+                    {% if form.completion_date.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.completion_date.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">製造が完了した日付を入力してください</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 送信ボタン -->
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-dark px-5">
+                    {% if object %}更新{% else %}登録{% endif %}
+                </button>
+                <a href="{% if object %}{% url 'products:production_detail' object.pk %}{% else %}{% url 'products:production_list' %}{% endif %}" class="btn btn-secondary px-5">
+                    キャンセル
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 注意事項 -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">入力時の注意事項</h5>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li>必須項目（<span class="text-danger">*</span>）は必ず入力してください。</li>
+            <li>製造コードは一意の識別子として使用されます。</li>
+            <li>製造数量は1以上の整数を入力してください。</li>
+            <li>各日付は以下の順序で設定してください：
+                <ul>
+                    <li>受注日 ≤ 製造期日 ≤ 完了予定日</li>
+                    <li>完了日は実際の製造完了後に入力してください</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,173 @@
+{# templates/products/product_detail.html #}
+
+{% extends "products/base.html" %}
+
+{% block title %}{{ product.name }} - {{ block.super }}{% endblock %}
+
+{% block product_content %}
+<!-- ヘッダー部分 -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">製品詳細</h2>
+    <div>
+        <a href="{% url 'products:product_update' product.pk %}" class="btn btn-dark">
+            <i class="bi bi-pencil"></i> 編集
+        </a>
+        <a href="{% url 'products:product_delete' product.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> 削除
+        </a>
+        <a href="{% url 'products:product_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left"></i> 一覧に戻る
+        </a>
+    </div>
+</div>
+
+<!-- 製品基本情報 -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="card-title mb-0">基本情報</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">製品コード</th>
+                        <td>{{ product.product_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">製品名</th>
+                        <td>{{ product.name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">単価</th>
+                        <td>￥{{ product.unit_price|stringformat:",.0f" }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-bordered">
+                    <tr>
+                        <th class="table-light" style="width: 30%">在庫数</th>
+                        <td>
+                            {% if inventory %}
+                                {{ inventory.quantity }}
+                                <span class="text-muted">
+                                    (￥{{ inventory.quantity|multiply:product.unit_price|stringformat:",.0f" }})
+                                </span>
+                            {% else %}
+                                0
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">登録日時</th>
+                        <td>{{ product.created_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="table-light">最終更新日時</th>
+                        <td>{{ product.updated_at|date:"Y/m/d H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 生産情報 -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">生産情報</h5>
+        <a href="{% url 'products:production_create' %}?product={{ product.pk }}" class="btn btn-sm btn-light">
+            <i class="bi bi-plus-lg"></i> 新規生産登録
+        </a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>製造コード</th>
+                        <th>数量</th>
+                        <th>製造期日</th>
+                        <th>完了予定日</th>
+                        <th>完了日</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for production in productions %}
+                    <tr>
+                        <td>{{ production.manufacture_code }}</td>
+                        <td>{{ production.quantity }}</td>
+                        <td>{{ production.manufacture_deadline|date:"Y/m/d" }}</td>
+                        <td>{{ production.planned_completion_date|date:"Y/m/d" }}</td>
+                        <td>{{ production.completion_date|date:"Y/m/d"|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'products:production_detail' production.pk %}" 
+                               class="btn btn-sm btn-outline-dark">詳細</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            生産情報がありません
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 入出荷履歴 -->
+<div class="card">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">入出荷履歴</h5>
+        <div class="btn-group">
+            <a href="{% url 'products:stock_inbound_create' %}?product={{ product.pk }}" class="btn btn-sm btn-light">
+                入荷登録
+            </a>
+            <a href="{% url 'products:stock_outbound_create' %}?product={{ product.pk }}" class="btn btn-sm btn-light">
+                出荷登録
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>種別</th>
+                        <th>数量</th>
+                        <th>備考</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movement in stock_movements %}
+                    <tr>
+                        <td>{{ movement.movement_date|date:"Y/m/d" }}</td>
+                        <td>
+                            {% if movement.movement_type == 'IN' %}
+                                <span class="text-success">入荷</span>
+                            {% else %}
+                                <span class="text-danger">出荷</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ movement.quantity }}</td>
+                        <td>{{ movement.note|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            入出荷履歴がありません
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
